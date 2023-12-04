@@ -196,11 +196,13 @@ function Home() {
               {carUsageMessages[0] && (
                 <Chart
                   chartType="ColumnChart"
-                  width="90%"
+                  width="100%"
                   height="300px"
                   data={carUsageData}
                   loader={<div>Loading Chart..</div>}
-                  style={{ backgroundColor: "black" }}
+                  options={{
+                    colors: ["#66C2A5"],
+                  }}
                 />
               )}
             </Suspense>
@@ -220,6 +222,7 @@ function Home() {
                     options={fulUsageOptions}
                     width={"100%"}
                     height={"250px"}
+                    className="text-black"
                   />
                 )}
               </Suspense>
@@ -245,7 +248,7 @@ function Home() {
                       m.payload?.map((msg: any, index: number) => (
                         <TableRow
                           key={Math.random()}
-                          className="text-background"
+                          className="text-background font-semibold"
                         >
                           <TableCell className="p-1 flex gap-2 items-center">
                             <div
@@ -254,7 +257,7 @@ function Home() {
                             {msg.name}
                           </TableCell>
                           <TableCell className="text-right p-1">
-                            {(msg.usage / fuelUsageTotal) * 100}
+                            {Math.ceil((msg.usage / fuelUsageTotal) * 100)}
                           </TableCell>
                           <TableCell className="text-right p-1">
                             {msg.usage}
