@@ -35,7 +35,7 @@ const FuelTransactionPage = () => {
       <h1 className="font-semibold text-xl p-5">
         Report / Fuel Transaction History
       </h1>
-      <div className="bg-primary/10 grow p-5 flex flex-col gap-5">
+      <div className="bg-primary/10 grow p-5 flex flex-col gap-5 h-screen overflow-auto">
         <div className="flex justify-between items-center">
           <h1 className="font-bold text-2xl p-4">Fuel Transaction History</h1>
           <div className="flex items-center gap-5">
