@@ -1,3 +1,4 @@
+import { DateRange } from "react-day-picker";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
@@ -8,6 +9,8 @@ interface BearState {
   setRealtimeMessages: (message: any[]) => void;
   setCarUsageMessages: (message: any[]) => void;
   setFuelUsageMessages: (message: any[]) => void;
+  rangeDate: any;
+  setRangeDate: (range: any) => void;
 }
 
 export const useStore = create<BearState>()(
@@ -28,6 +31,11 @@ export const useStore = create<BearState>()(
         setFuelUsageMessages: (message: any[]) =>
           set(() => ({
             fuelUsageMessages: message,
+          })),
+        rangeDate: null,
+        setRangeDate: (range: DateRange) =>
+          set(() => ({
+            rangeDate: range,
           })),
       }),
       { name: "zustand-store" }

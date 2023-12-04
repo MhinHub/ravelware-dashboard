@@ -22,11 +22,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { fuelTransactions } from "@/db/faker";
+import { createFuelTransactions } from "@/db/faker";
+import { DateRange } from "react-day-picker";
+import { useStore } from "@/store/useStore";
 
 const FuelTransactionPage = () => {
-  const [date1, setDate1] = React.useState<Date>();
-  const [date2, setDate2] = React.useState<Date>();
+  // const { rangeDate, setRangeDate } = useStore();
+  const [rangeDate, setRangeDate] = React.useState<DateRange | undefined>();
+
   return (
     <div className="flex flex-col h-full">
       <h1 className="font-semibold text-xl p-5">
@@ -42,12 +45,19 @@ const FuelTransactionPage = () => {
                   variant={"outline"}
                   className={cn(
                     "w-fit justify-start text-left font-normal",
-                    !date1 && !date2 && "text-muted-foreground"
+                    !rangeDate && "text-muted-foreground"
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date1 && date2 ? (
-                    format(date1, "PPP") + " - " + format(date2, "PPP")
+                  {rangeDate?.from ? (
+                    rangeDate.to ? (
+                      <p>
+                        {format(rangeDate.from, "PPP")} -{" "}
+                        {format(rangeDate.to, "PPP")}
+                      </p>
+                    ) : (
+                      <p>{format(rangeDate.from, "PPP")}</p>
+                    )
                   ) : (
                     <span>Pick a date</span>
                   )}
@@ -85,16 +95,12 @@ const FuelTransactionPage = () => {
                     </p>
                   </div>
                   <Calendar
-                    mode="single"
-                    selected={date1}
-                    onSelect={setDate1}
-                    initialFocus
-                  />
-                  <Calendar
-                    mode="single"
-                    selected={date2}
-                    onSelect={setDate2}
-                    initialFocus
+                    mode="range"
+                    defaultMonth={new Date()}
+                    numberOfMonths={2}
+                    min={2}
+                    selected={rangeDate}
+                    onSelect={setRangeDate}
                   />
                 </div>
               </PopoverContent>
@@ -121,7 +127,10 @@ const FuelTransactionPage = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {fuelTransactions.map((item: any, index: number) => (
+              {createFuelTransactions({
+                from: rangeDate?.from && rangeDate?.from?.toISOString(),
+                to: rangeDate?.to && rangeDate?.to?.toISOString(),
+              }).map((item: any, index: number) => (
                 <TableRow key={index}>
                   <TableCell>{item.id}</TableCell>
                   <TableCell>
