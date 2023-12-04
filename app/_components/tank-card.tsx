@@ -13,7 +13,7 @@ interface TankCardProps {
 
 const TankCard = ({ name, current, max, status, updated }: TankCardProps) => {
   const percent = (current / max) * 100;
-  if (!status) {
+  if (!percent) {
     return <Skeleton className="min-w-[500px] min-h-[180px] border p-5" />;
   }
   return (
@@ -56,7 +56,7 @@ const TankCard = ({ name, current, max, status, updated }: TankCardProps) => {
           <p className="font-semibold text-xl">Status: {status}</p>
         </div>
         <div className="flex items-start text-xs max-w-[15%] h-full">
-          <p className="text-end">
+          <p className="flex text-end align-top items-start self-start">
             Last transaction{" "}
             {formatDistance(new Date(updated), new Date(), { addSuffix: true })}
           </p>

@@ -17,6 +17,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";
 import { useStore } from "@/store/useStore";
 
+import Carousel from "nuka-carousel";
+import { ChevronRight, ChevronLeft } from "lucide-react";
+
 function Home() {
   const {
     realtimeMessages,
@@ -143,7 +146,30 @@ function Home() {
                 key={i}
                 fallback={<Skeleton className="w-96 h-48 bg-slate-700" />}
               >
-                <div className="flex gap-4 overflow-auto">
+                <Carousel
+                  autoplay
+                  cellSpacing={20}
+                  dragging
+                  className="flex gap-4"
+                  slidesToShow={2}
+                  wrapAround
+                  renderCenterRightControls={({ nextSlide }) => (
+                    <button
+                      onClick={nextSlide}
+                      className="w-10 h-10 rounded-full bg-black/20 text-white font-bold flex items-center justify-center"
+                    >
+                      <ChevronRight />
+                    </button>
+                  )}
+                  renderCenterLeftControls={({ previousSlide }) => (
+                    <button
+                      onClick={previousSlide}
+                      className="w-10 h-10 rounded-full bg-black/10 text-white font-bold flex items-center justify-center"
+                    >
+                      <ChevronLeft />
+                    </button>
+                  )}
+                >
                   {m.payload?.map((msg: any, i: number) => (
                     <TankCard
                       key={i}
@@ -154,12 +180,12 @@ function Home() {
                       updated={msg.updated_at}
                     />
                   ))}
-                </div>
+                </Carousel>
               </Suspense>
             );
           })}
         </div>
-        <div className="grow w-full flex gap-5">
+        <div className="pb-20 w-full flex gap-5">
           <div className="w-full h-full border rounded-xl flex flex-col items-center justify-between bg-white p-3">
             <p className="font-semibold text-2xl p-5 text-center text-background">
               Top 5 Car Usage This Month
@@ -173,6 +199,8 @@ function Home() {
                   width="90%"
                   height="300px"
                   data={carUsageData}
+                  loader={<div>Loading Chart..</div>}
+                  style={{ backgroundColor: "black" }}
                 />
               )}
             </Suspense>
