@@ -75,19 +75,23 @@ const Sidebar = () => {
               <p className="ml-12">Fuel Transaction History</p>
             </Link>
             <Link
-              href="/"
+              href="/report/machine-usage"
               className={cn(
                 "relative w-full hover:bg-primary/5 py-3 flex items-center",
-                pathname === "/report" ? "opacity-100" : "opacity-50"
+                pathname === "/report/machine-usage"
+                  ? "opacity-100"
+                  : "opacity-50"
               )}
             >
               <p className="ml-12">Machine Usage</p>
             </Link>
             <Link
-              href="/"
+              href="/report/manpower-usage"
               className={cn(
                 "relative w-full hover:bg-primary/5 py-3 flex items-center",
-                pathname === "/report" ? "opacity-100" : "opacity-50"
+                pathname === "/report/manpower-usage"
+                  ? "opacity-100"
+                  : "opacity-50"
               )}
             >
               <p className="ml-12">Manpower Usage</p>
@@ -95,7 +99,7 @@ const Sidebar = () => {
           </div>
         )}
         <Link
-          href="/"
+          href="/history"
           className={cn(
             "relative w-full hover:bg-primary/5 py-3 flex items-center",
             pathname === "/history" ? "opacity-100" : "opacity-50"
@@ -110,7 +114,7 @@ const Sidebar = () => {
           <p>History</p>
         </Link>
         <Link
-          href="/"
+          href="/management"
           className={cn(
             "relative w-full hover:bg-primary/5 py-3 flex items-center",
             pathname === "/management" ? "opacity-100" : "opacity-50"
@@ -125,7 +129,7 @@ const Sidebar = () => {
           <p>Management</p>
         </Link>
         <Link
-          href="/"
+          href="/profile"
           className={cn(
             "relative w-full hover:bg-primary/5 py-3 flex items-center",
             pathname === "/profile" ? "opacity-100" : "opacity-50"
