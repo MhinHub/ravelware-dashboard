@@ -147,7 +147,7 @@ function Home() {
                 fallback={<Skeleton className="w-96 h-48 bg-slate-700" />}
               >
                 <Carousel
-                  autoplay
+                  // autoplay
                   cellSpacing={20}
                   dragging
                   className="flex gap-4"

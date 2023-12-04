@@ -13,7 +13,7 @@ interface TankCardProps {
 
 const TankCard = ({ name, current, max, status, updated }: TankCardProps) => {
   const percent = (current / max) * 100;
-  if (!percent) {
+  if (!current) {
     return <Skeleton className="min-w-[500px] min-h-[180px] border p-5" />;
   }
   return (
@@ -27,7 +27,7 @@ const TankCard = ({ name, current, max, status, updated }: TankCardProps) => {
     >
       <div className="flex gap-4 items-center h-full w-full">
         <div className="bg-background p-3 h-full w-[35%] rounded-lg flex items-center justify-between">
-          <div className="relative overflow-hidden flex items-end w-6 h-full bg-muted-foreground rounded-lg">
+          <div className="relative overflow-hidden flex items-end w-6 h-20 bg-muted-foreground rounded-lg">
             <div className="absolute w-full top-1 flex flex-col items-center text-xs text-background font-semibold text-center">
               <p>{percent}</p>
               <p>%</p>
