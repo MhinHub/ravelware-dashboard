@@ -8,6 +8,7 @@ export const createFuelTransactions = ({
   from: any;
   to: any;
 }) => {
+  console.table(from, to);
   let data = () => {
     return {
       id: faker.number.int({ max: 100, min: 1 }),

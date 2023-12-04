@@ -30,6 +30,8 @@ const FuelTransactionPage = () => {
   // const { rangeDate, setRangeDate } = useStore();
   const [rangeDate, setRangeDate] = React.useState<DateRange | undefined>();
 
+  console.log("rangeDate?.from?.getTime()", rangeDate?.from?.getTime());
+
   return (
     <div className="flex flex-col h-full">
       <h1 className="font-semibold text-xl p-5">
@@ -128,8 +130,10 @@ const FuelTransactionPage = () => {
             </TableHeader>
             <TableBody>
               {createFuelTransactions({
-                from: rangeDate?.from && rangeDate?.from?.toISOString(),
-                to: rangeDate?.to && rangeDate?.to?.toISOString(),
+                from: rangeDate?.from?.getTime() as number,
+                to: rangeDate?.to
+                  ? (rangeDate?.to?.getTime() as number)
+                  : (rangeDate?.from?.getTime() as number),
               }).map((item: any, index: number) => (
                 <TableRow key={index}>
                   <TableCell>{item.id}</TableCell>
