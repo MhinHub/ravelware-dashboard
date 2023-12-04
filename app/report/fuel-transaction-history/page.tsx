@@ -22,6 +22,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { fuelTransactions } from "@/db/faker";
+
 const FuelTransactionPage = () => {
   const [date1, setDate1] = React.useState<Date>();
   const [date2, setDate2] = React.useState<Date>();
@@ -107,9 +109,10 @@ const FuelTransactionPage = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[100px]">ID</TableHead>
+                <TableHead className="w-7">ID</TableHead>
                 <TableHead>Time/Date</TableHead>
                 <TableHead>Station</TableHead>
+                <TableHead>Driver</TableHead>
                 <TableHead>License</TableHead>
                 <TableHead>Code</TableHead>
                 <TableHead>Fuel</TableHead>
@@ -118,19 +121,22 @@ const FuelTransactionPage = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {Array.from({ length: 10 }).map((_, index) => (
-                <React.Suspense fallback={<Skeleton className="w-full h-14" />}>
-                  <TableRow key={index}>
-                    <TableCell>1</TableCell>
-                    <TableCell>2023-10-18 15:13:17</TableCell>
-                    <TableCell>Station 2</TableCell>
-                    <TableCell>andrew</TableCell>
-                    <TableCell>B 1234 K</TableCell>
-                    <TableCell>12345</TableCell>
-                    <TableCell>pertalite</TableCell>
-                    <TableCell>2</TableCell>
-                  </TableRow>
-                </React.Suspense>
+              {fuelTransactions.map((item: any, index: number) => (
+                <TableRow key={index}>
+                  <TableCell>{item.id}</TableCell>
+                  <TableCell>
+                    {new Date(item.date).toLocaleString("id-ID", {
+                      hour12: true,
+                    })}
+                  </TableCell>
+                  <TableCell>{item.station}</TableCell>
+                  <TableCell>{item.driver}</TableCell>
+                  <TableCell>{item.license}</TableCell>
+                  <TableCell>{item.code}</TableCell>
+                  <TableCell>{item.fuel}</TableCell>
+                  <TableCell>{item.usage}</TableCell>
+                  <TableCell>{item.left}</TableCell>
+                </TableRow>
               ))}
             </TableBody>
           </Table>
