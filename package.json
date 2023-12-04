@@ -25,7 +25,8 @@
     "react-google-charts": "^4.0.1",
     "singledivui": "^1.0.1",
     "tailwind-merge": "^2.0.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zustand": "^4.4.7"
   },
   "devDependencies": {
     "@types/node": "^20",

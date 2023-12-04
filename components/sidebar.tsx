@@ -62,7 +62,7 @@ const Sidebar = () => {
           )}
         </div>
         {reportExpand && (
-          <div className="font-normal text-base">
+          <div className="relative font-normal text-base animate-in fade-in-50 slide-in-from-top-5 transition-all duration-200 ease-in-out">
             <Link
               href="/report/fuel-transaction-history"
               className={cn(

@@ -30,8 +30,9 @@ function useMqtt({
 
     memoizedHandlers.forEach(({ topic }) => client.subscribe(topic));
 
+    client.on("connect", () => onConnectedHandler(client));
+
     client.on("message", (topic: string, rawPayload: any, packet: any) => {
-      console.log("message received", topic, rawPayload.toString());
       const handler = memoizedHandlers.find((t) => t.topic === topic)?.handler;
       if (!handler) return;
 
@@ -44,8 +45,6 @@ function useMqtt({
 
       handler({ topic, payload, packet });
     });
-
-    client.on("connect", () => onConnectedHandler(client));
 
     client.on("error", (err) => {
       alert(err);

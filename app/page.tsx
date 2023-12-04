@@ -15,11 +15,19 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";
+import { useStore } from "@/store/useStore";
 
 function Home() {
-  const [realtimeMessages, setRealtimeMessages] = useState<any[]>([]);
-  const [carUsageMessages, setCarUsageMessages] = useState<any[]>([]);
-  const [fuelUsageMessages, setFuelUsageMessages] = useState<any[]>([]);
+  const {
+    realtimeMessages,
+    setRealtimeMessages,
+    carUsageMessages,
+    setCarUsageMessages,
+    fuelUsageMessages,
+    setFuelUsageMessages,
+  } = useStore();
+
+  console.log("realtimeMessages", realtimeMessages);
 
   const [fuelUsageTotal, setFuelUsageTotal] = useState(0);
 
@@ -80,7 +88,7 @@ function Home() {
   const carUsageData = useMemo(() => {
     let data = [["Element", "Volume (Liter)"]];
     carUsageMessages.forEach((message) =>
-      message.payload.forEach((payload: any) =>
+      message.payload?.forEach((payload: any) =>
         data.push([payload.name, payload.usage])
       )
     );
@@ -91,7 +99,7 @@ function Home() {
     let data = [["Element", "Ratio"]];
     let total = 0;
     fuelUsageMessages.forEach((message) =>
-      message.payload.forEach((payload: any) => {
+      message.payload?.forEach((payload: any) => {
         data.push([payload.name, payload.usage]);
         total += payload.usage;
       })
@@ -136,7 +144,7 @@ function Home() {
                 fallback={<Skeleton className="w-96 h-48 bg-slate-700" />}
               >
                 <div className="flex gap-4 overflow-auto">
-                  {m.payload.map((msg: any, i: number) => (
+                  {m.payload?.map((msg: any, i: number) => (
                     <TankCard
                       key={i}
                       name={msg.name}
@@ -206,7 +214,7 @@ function Home() {
                   </TableHeader>
                   <TableBody>
                     {fuelUsageMessages.map((m) =>
-                      m.payload.map((msg: any, index: number) => (
+                      m.payload?.map((msg: any, index: number) => (
                         <TableRow
                           key={Math.random()}
                           className="text-background"
