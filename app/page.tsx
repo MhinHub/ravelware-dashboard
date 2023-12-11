@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useRef, memo, useMemo } from "react";
-import type { MqttClient } from "mqtt";
-import useMqtt from "../lib/useMqtt";
+import { useState, useEffect, memo, useMemo } from "react";
+import useMqtt from "@/lib/useMqtt";
 import TankCard from "./_components/tank-card";
 import { Chart } from "react-google-charts";
 import {
@@ -30,83 +29,56 @@ function Home() {
     setFuelUsageMessages,
   } = useStore();
 
-  console.log("realtimeMessages", realtimeMessages);
-
   const [fuelUsageTotal, setFuelUsageTotal] = useState(0);
+
+  const { isConnected, mqttSubscribe, payload } = useMqtt();
 
   const addMessage = useMemo(
     () => (message: any) => {
       if (message.topic === "test/realtime") {
-        setRealtimeMessages([message]);
+        setRealtimeMessages(JSON.parse(message.message));
       }
       if (message.topic === "test/top-5-car-usage") {
-        setCarUsageMessages([message]);
+        setCarUsageMessages(JSON.parse(message.message));
       }
       if (message.topic === "test/fuel-usage") {
-        setFuelUsageMessages([message]);
+        setFuelUsageMessages(JSON.parse(message.message));
       }
     },
     []
   );
 
-  const incommingMessageHandlers = useRef([
-    {
-      topic: "test/realtime",
-      handler: (msg: string) => {
-        addMessage(msg);
-      },
-    },
-    {
-      topic: "test/top-5-car-usage",
-      handler: (msg: string) => {
-        addMessage(msg);
-      },
-    },
-    {
-      topic: "test/fuel-usage",
-      handler: (msg: string) => {
-        addMessage(msg);
-      },
-    },
-  ]);
+  useEffect(() => {
+    if (isConnected) {
+      mqttSubscribe([
+        "test/realtime",
+        "test/top-5-car-usage",
+        "test/fuel-usage",
+      ]);
+    }
+  }, [isConnected]);
 
-  const mqttClientRef = useRef<MqttClient | null>(null);
-  const setMqttClient = (client: MqttClient) => {
-    mqttClientRef.current = client;
-  };
-
-  useMqtt({
-    uri:
-      (process.env.NEXT_PUBLIC_MQTT_WEBSOCKET_URI as string) ||
-      (process.env.NEXT_PUBLIC_MQTT_URI as string),
-    options: {
-      username: process.env.NEXT_PUBLIC_MQTT_USERNAME,
-      password: process.env.NEXT_PUBLIC_MQTT_PASSWORD,
-      clientId: `mqtt_${Math.random().toString(16).substring(2, 8)}`,
-    },
-    topicHandlers: incommingMessageHandlers.current,
-    onConnectedHandler: (client) => setMqttClient(client),
-  });
+  useEffect(() => {
+    if (payload?.message) {
+      addMessage(payload);
+    }
+  }, [payload]);
 
   const carUsageData = useMemo(() => {
     let data = [["Element", "Volume (Liter)"]];
-    carUsageMessages.forEach((message) =>
-      message.payload?.forEach((payload: any) =>
-        data.push([payload.name, payload.usage])
-      )
-    );
+    carUsageMessages.map((message) => {
+      data.push([message.name, message.usage]);
+    });
     return data;
   }, [carUsageMessages]);
 
   const fuelUsageData = useMemo(() => {
     let data = [["Element", "Ratio"]];
     let total = 0;
-    fuelUsageMessages.forEach((message) =>
-      message.payload?.forEach((payload: any) => {
-        data.push([payload.name, payload.usage]);
-        total += payload.usage;
-      })
-    );
+    fuelUsageMessages.forEach((message) => {
+      data.push([message.name, message.usage]);
+      total += message.usage;
+    });
     setFuelUsageTotal(total);
     return data;
   }, [fuelUsageMessages]);
@@ -140,50 +112,43 @@ function Home() {
           REALTIME FUEL TANK STATUS
         </h1>
         <div className="p-3 bg-background min-h-[200px] rounded-xl">
-          {realtimeMessages.map((m, i) => {
-            return (
-              <Suspense
-                key={i}
-                fallback={<Skeleton className="w-96 h-48 bg-slate-700" />}
-              >
-                <Carousel
-                  autoplay
-                  cellSpacing={20}
-                  dragging
-                  className="flex gap-4"
-                  slidesToShow={2}
-                  wrapAround
-                  renderCenterRightControls={({ nextSlide }) => (
-                    <button
-                      onClick={nextSlide}
-                      className="w-10 h-10 rounded-full bg-black/20 text-white font-bold flex items-center justify-center"
-                    >
-                      <ChevronRight />
-                    </button>
-                  )}
-                  renderCenterLeftControls={({ previousSlide }) => (
-                    <button
-                      onClick={previousSlide}
-                      className="w-10 h-10 rounded-full bg-black/10 text-white font-bold flex items-center justify-center"
-                    >
-                      <ChevronLeft />
-                    </button>
-                  )}
+          <Suspense fallback={<Skeleton className="w-96 h-48 bg-slate-700" />}>
+            <Carousel
+              autoplay
+              cellSpacing={20}
+              dragging
+              className="flex gap-4"
+              slidesToShow={2}
+              wrapAround
+              renderCenterRightControls={({ nextSlide }) => (
+                <button
+                  onClick={nextSlide}
+                  className="w-10 h-10 rounded-full bg-black/20 text-white font-bold flex items-center justify-center"
                 >
-                  {m.payload?.map((msg: any, i: number) => (
-                    <TankCard
-                      key={i}
-                      name={msg.name}
-                      current={msg.current_stock}
-                      max={msg.maximum_stock}
-                      status={msg.status}
-                      updated={msg.updated_at}
-                    />
-                  ))}
-                </Carousel>
-              </Suspense>
-            );
-          })}
+                  <ChevronRight />
+                </button>
+              )}
+              renderCenterLeftControls={({ previousSlide }) => (
+                <button
+                  onClick={previousSlide}
+                  className="w-10 h-10 rounded-full bg-black/10 text-white font-bold flex items-center justify-center"
+                >
+                  <ChevronLeft />
+                </button>
+              )}
+            >
+              {realtimeMessages.map((msg, i) => (
+                <TankCard
+                  key={i}
+                  name={msg.name}
+                  current={msg.current_stock}
+                  max={msg.maximum_stock}
+                  status={msg.status}
+                  updated={msg.updated_at}
+                />
+              ))}
+            </Carousel>
+          </Suspense>
         </div>
         <div className="pb-20 w-full flex gap-5">
           <div className="w-full h-full border rounded-xl flex flex-col items-center justify-between bg-white p-3">
@@ -244,27 +209,25 @@ function Home() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {fuelUsageMessages.map((m) =>
-                      m.payload?.map((msg: any, index: number) => (
-                        <TableRow
-                          key={Math.random()}
-                          className="text-background font-semibold"
-                        >
-                          <TableCell className="p-1 flex gap-2 items-center">
-                            <div
-                              className={`w-3 h-3 rounded-full ${fulUsageColor[index]}`}
-                            ></div>
-                            {msg.name}
-                          </TableCell>
-                          <TableCell className="text-right p-1">
-                            {Math.ceil((msg.usage / fuelUsageTotal) * 100)}
-                          </TableCell>
-                          <TableCell className="text-right p-1">
-                            {msg.usage}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
+                    {fuelUsageMessages.map((msg: any, index: number) => (
+                      <TableRow
+                        key={Math.random()}
+                        className="text-background font-semibold"
+                      >
+                        <TableCell className="p-1 flex gap-2 items-center">
+                          <div
+                            className={`w-3 h-3 rounded-full ${fulUsageColor[index]}`}
+                          ></div>
+                          {msg.name}
+                        </TableCell>
+                        <TableCell className="text-right p-1">
+                          {Math.ceil((msg.usage / fuelUsageTotal) * 100)}
+                        </TableCell>
+                        <TableCell className="text-right p-1">
+                          {msg.usage}
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               )}

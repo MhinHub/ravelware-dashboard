@@ -1,63 +1,112 @@
-import type { MqttClient, IClientOptions } from "mqtt";
-import MQTT from "mqtt";
-import { useEffect, useRef, useMemo } from "react";
+import { useState, useEffect } from "react";
+import mqtt from "mqtt";
 
-interface TopicHandler {
-  topic: string;
-  handler: (payload: any) => void;
-}
+const setting = {
+  url:
+    (process.env.NEXT_PUBLIC_MQTT_WEBSOCKET_URI as string) ||
+    (process.env.NEXT_PUBLIC_MQTT_URI as string),
+  options: {
+    username: process.env.NEXT_PUBLIC_MQTT_USERNAME,
+    password: process.env.NEXT_PUBLIC_MQTT_PASSWORD,
+  },
+};
 
-interface useMqttProps {
-  uri: string;
-  options?: IClientOptions;
-  topicHandlers?: TopicHandler[];
-  onConnectedHandler?: (client: MqttClient) => void;
-}
+export default function useMqtt() {
+  const [client, setClient] = useState<any>(null);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [payload, setPayload] = useState<any>({});
 
-function useMqtt({
-  uri,
-  options = {},
-  topicHandlers = [],
-  onConnectedHandler = () => {},
-}: useMqttProps) {
-  const clientRef = useRef<MqttClient | null>(null);
+  const mqttConnect = async () => {
+    const clientId = `mqttjs_ + ${Math.random().toString(16).substring(2, 8)}`;
+    const url = setting.url;
+    const options = {
+      clientId,
+      keepalive: 60,
+      clean: true,
+      reconnectPeriod: 300000,
+      connectTimeout: 30000,
+      rejectUnauthorized: false,
+      ...setting.options,
+    };
+    const clientMqtt = await mqtt.connect(url, options);
+    setClient(clientMqtt);
+  };
 
-  const memoizedHandlers = useMemo(() => topicHandlers, [topicHandlers]);
+  const mqttDisconnect = () => {
+    if (client) {
+      client.end(() => {
+        console.log("MQTT Disconnected");
+        setIsConnected(false);
+      });
+    }
+  };
+
+  const mqttSubscribe = async (topic: string[]) => {
+    if (client) {
+      console.log("MQTT subscribe ", topic);
+      const clientMqtt = await client.subscribe(
+        [...topic],
+        {
+          qos: 0,
+          rap: false,
+          rh: 0,
+        },
+        (error: any) => {
+          if (error) {
+            console.log("MQTT Subscribe to topics error", error);
+            return;
+          }
+        }
+      );
+      setClient(clientMqtt);
+    }
+  };
+
+  const mqttUnSubscribe = async (topic: string) => {
+    if (client) {
+      const clientMqtt = await client.unsubscribe(topic, (error: any) => {
+        if (error) {
+          console.log("MQTT Unsubscribe error", error);
+          return;
+        }
+      });
+      setClient(clientMqtt);
+    }
+  };
 
   useEffect(() => {
-    const client = MQTT.connect(uri, options);
-    clientRef.current = client;
-
-    memoizedHandlers.forEach(({ topic }) => client.subscribe(topic));
-
-    client.on("connect", () => onConnectedHandler(client));
-
-    client.on("message", (topic: string, rawPayload: any, packet: any) => {
-      const handler = memoizedHandlers.find((t) => t.topic === topic)?.handler;
-      if (!handler) return;
-
-      let payload;
-      try {
-        payload = JSON.parse(rawPayload);
-      } catch {
-        payload = rawPayload;
-      }
-
-      handler({ topic, payload, packet });
-    });
-
-    client.on("error", (err) => {
-      alert(err);
-      client.end();
-    });
-
+    mqttConnect();
     return () => {
-      memoizedHandlers.forEach(({ topic }) => client.unsubscribe(topic));
-      client.end();
+      mqttDisconnect();
     };
-  }, [uri, options, memoizedHandlers, onConnectedHandler]);
+  }, []);
 
-  return null;
+  useEffect(() => {
+    if (client) {
+      client.on("connect", () => {
+        setIsConnected(true);
+        console.log("MQTT Connected");
+      });
+      client.on("error", (err: any) => {
+        console.error("MQTT Connection error: ", err);
+        client.end();
+      });
+      client.on("reconnect", () => {
+        setIsConnected(true);
+      });
+      client.on("message", (_topic: string, message: any) => {
+        const payloadMessage = { topic: _topic, message: message.toString() };
+        setPayload(payloadMessage);
+      });
+    }
+  }, [client]);
+
+  return {
+    mqttConnect,
+    mqttDisconnect,
+    mqttSubscribe,
+    mqttUnSubscribe,
+    payload,
+    isConnected,
+  };
 }
-
-export default useMqtt;
