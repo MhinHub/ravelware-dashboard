@@ -164,7 +164,11 @@ function Home() {
                   width="100%"
                   height="300px"
                   data={carUsageData}
-                  loader={<div>Loading Chart..</div>}
+                  loader={
+                    <div className="text-black/70 animate-pulse">
+                      Loading Chart..
+                    </div>
+                  }
                   options={{
                     colors: ["#66C2A5"],
                   }}
@@ -184,6 +188,11 @@ function Home() {
                   <Chart
                     chartType="PieChart"
                     data={fuelUsageData}
+                    loader={
+                      <div className="text-black/70 animate-pulse">
+                        Loading Chart..
+                      </div>
+                    }
                     options={fulUsageOptions}
                     width={"100%"}
                     height={"250px"}
